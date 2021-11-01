@@ -1,0 +1,31 @@
+version: "3.9"
+   
+services:
+  db:
+    platform: linux/x86_64
+    image: mysql:5.7
+    ports:
+      - '3306:3306'
+    environment:
+       MYSQL_DATABASE: 'app'
+       MYSQL_USER: 'user'
+       MYSQL_PASSWORD: 'pass'
+       MYSQL_ROOT_PASSWORD: 'pass'
+  web:
+    image: maorkavod/pastebin-crawler:0.1
+    build: .
+    entrypoint: ./wait.sh
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  cronjob:
+    image: maorkavod/pastebin-crawler:0.1
+    build: .
+    command: /usr/sbin/crond -f -l 8
+    volumes:
+      - .:/code
+    depends_on:
+      - db
